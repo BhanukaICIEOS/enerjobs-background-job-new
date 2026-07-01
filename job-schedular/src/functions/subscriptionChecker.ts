@@ -16,6 +16,6 @@ export async function subscriptionChecker(_myTimer: Timer, context: InvocationCo
 }
 
 app.timer('subscriptionChecker', {
-    schedule: '0 0 0 * * *',
+    schedule: '0 * * * * *',
     handler: subscriptionChecker
 });

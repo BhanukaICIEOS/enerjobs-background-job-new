@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { JobPromotion, IJobPromotion } from '../models/jobPromotion.model';
+import { Job } from '../models/job.model';
 import { JobPromotionStatus } from '../enums/job-promotion-status.enum';
 
 function startOfToday(): Date {
@@ -36,11 +37,22 @@ class JobPromotionRepository {
         await JobPromotion.updateOne({ _id: id }, { $set: { reminderSentAt: new Date() } });
     }
 
-    async bulkMarkExpired(ids: mongoose.Types.ObjectId[]): Promise<number> {
+    async bulkMarkExpired(promotions: IJobPromotion[]): Promise<number> {
+        const ids = promotions.map(p => p._id as mongoose.Types.ObjectId);
+        const jobIds = promotions.map(p => p.jobId as mongoose.Types.ObjectId);
+
         const result = await JobPromotion.updateMany(
             { _id: { $in: ids } },
             { $set: { status: JobPromotionStatus.EXPIRED } }
         );
+
+        if (jobIds.length > 0) {
+            await Job.updateMany(
+                { _id: { $in: jobIds } },
+                { $set: { isPromoted: false } }
+            );
+        }
+
         return result.modifiedCount;
     }
 }

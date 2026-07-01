@@ -25,8 +25,7 @@ class PromotionExpiryService {
         const promotions = await jobPromotionRepository.findExpiredActivePromotions();
         if (promotions.length === 0) return 0;
 
-        const ids = promotions.map(p => p._id as mongoose.Types.ObjectId);
-        const updatedCount = await jobPromotionRepository.bulkMarkExpired(ids);
+        const updatedCount = await jobPromotionRepository.bulkMarkExpired(promotions);
 
         for (const promo of promotions) {
             await queueService.sendPromotionMessage({

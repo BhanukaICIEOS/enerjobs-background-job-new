@@ -14,6 +14,6 @@ export async function jobExpiryChecker(_myTimer: Timer, context: InvocationConte
 }
 
 app.timer('jobExpiryChecker', {
-    schedule: '0 0 0 * * *', // TEMP: every minute for testing — revert to '0 0 0 * * *'
+    schedule: '0 * * * * *', // TEMP: every minute for testing — revert to '0 0 0 * * *'
     handler: jobExpiryChecker
 });
