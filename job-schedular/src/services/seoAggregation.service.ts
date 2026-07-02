@@ -113,7 +113,6 @@ class SeoAggregationService {
                     const categoryId = category._id as Types.ObjectId;
 
                     const stats = await seoStatsAggregatorService.computeCityCombinedStats(cityId, categoryId);
-                    if (stats.jobCount === 0) continue;
 
                     await pseoPageRepository.upsert({
                         type: 'category-region',

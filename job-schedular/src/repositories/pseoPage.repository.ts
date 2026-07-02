@@ -21,7 +21,12 @@ export interface UpsertPSEOPageData {
 }
 
 class PSEOPageRepository {
-    async upsert(data: UpsertPSEOPageData): Promise<IPSEOPage> {
+    /**
+     * Never creates a new doc for a zero-job combination (avoids thousands of empty
+     * city x category pages), but always updates an existing doc down to zero so a
+     * page whose last job disappeared doesn't keep reporting a stale positive count.
+     */
+    async upsert(data: UpsertPSEOPageData): Promise<IPSEOPage | null> {
         const filter = {
             regionId: data.regionId,
             categoryId: data.categoryId ?? null,
@@ -35,10 +40,10 @@ class PSEOPageRepository {
                 $set: stats,
                 $setOnInsert: { type, regionId, categoryId, slug, combinedSlug },
             },
-            { upsert: true, new: true }
+            { upsert: data.jobCount > 0, new: true }
         ).lean();
 
-        return doc as unknown as IPSEOPage;
+        return doc as unknown as IPSEOPage | null;
     }
 }
 
