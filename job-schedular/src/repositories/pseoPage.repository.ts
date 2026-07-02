@@ -40,7 +40,7 @@ class PSEOPageRepository {
                 $set: stats,
                 $setOnInsert: { type, regionId, categoryId, slug, combinedSlug },
             },
-            { upsert: data.jobCount > 0, new: true }
+            { upsert: data.jobCount > 0, returnDocument: 'after' }
         ).lean();
 
         return doc as unknown as IPSEOPage | null;
