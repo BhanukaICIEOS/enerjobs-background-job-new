@@ -1,8 +1,6 @@
 import { Types } from 'mongoose';
 import { subscriptionRepository } from '../repositories/subscription.repository';
-import { companyProfileRepository } from '../repositories/companyProfile.repository';
 import { queueService } from './queue.service';
-import { SubscriptionStatus } from '../enums/subscription-status.enum';
 
 class SubscriptionExpiryService {
     /**
@@ -21,10 +19,7 @@ class SubscriptionExpiryService {
         const subscriptionIds = expired.map(s => s._id as Types.ObjectId);
         const companyIds      = expired.map(s => s.companyId as Types.ObjectId);
 
-        await Promise.all([
-            subscriptionRepository.bulkDowngradeToFree(subscriptionIds, freePlan._id as Types.ObjectId),
-            companyProfileRepository.bulkUpdateSubscriptionStatus(companyIds, SubscriptionStatus.FREE),
-        ]);
+        await subscriptionRepository.bulkDowngradeToFree(subscriptionIds, companyIds, freePlan._id as Types.ObjectId);
 
         for (const sub of expired) {
             await queueService.sendSubscriptionMessage({

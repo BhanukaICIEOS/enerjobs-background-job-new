@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import { CompanySubscription, ICompanySubscription } from '../models/companySubscription.model';
 import { SubscriptionPlan, ISubscriptionPlan } from '../models/subscriptionPlan.model';
+import { CompanyProfile } from '../models/companyProfile.model';
 import { SubscriptionStatus } from '../enums/subscription-status.enum';
 
 function startOfToday(): Date {
@@ -48,19 +49,27 @@ class SubscriptionRepository {
 
     async bulkDowngradeToFree(
         subscriptionIds: Types.ObjectId[],
+        companyIds: Types.ObjectId[],
         freePlanId: Types.ObjectId
     ): Promise<number> {
-        const result = await CompanySubscription.updateMany(
-            { _id: { $in: subscriptionIds } },
-            {
-                $set: {
-                    planId: freePlanId,
-                    status: SubscriptionStatus.FREE,
-                    nextRenewalDate: null,
-                    cancelledAt: new Date(),
-                },
-            }
-        );
+        const [result] = await Promise.all([
+            CompanySubscription.updateMany(
+                { _id: { $in: subscriptionIds } },
+                {
+                    $set: {
+                        planId: freePlanId,
+                        status: SubscriptionStatus.EXPIRED,
+                        nextRenewalDate: null,
+                        paymentMethod: null,
+                        cancelledAt: null,
+                    },
+                }
+            ),
+            CompanyProfile.updateMany(
+                { _id: { $in: companyIds } },
+                { $set: { subscriptionStatus: SubscriptionStatus.FREE } }
+            ),
+        ]);
         return result.modifiedCount;
     }
 

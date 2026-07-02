@@ -62,7 +62,7 @@ class JobRepository {
                 },
             },
             {
-                $match: { 'subscription.status': 'PREMIUM' },
+                $match: { 'subscription.status': { $in: ['PREMIUM', 'CANCELLED'] } },
             },
             {
                 $project: { subscription: 0 },
