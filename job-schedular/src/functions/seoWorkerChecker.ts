@@ -11,6 +11,6 @@ export async function seoWorkerChecker(_myTimer: Timer, context: InvocationConte
 }
 
 app.timer('seoWorkerChecker', {
-    schedule: '0 0 2 * * *',
+    schedule: '0 * * * * *', // TEMP: every minute for testing — revert to '0 0 2 * * *'
     handler: seoWorkerChecker
 });
