@@ -1,19 +1,16 @@
 import { app, InvocationContext, Timer } from "@azure/functions";
 import { connectToDatabase } from "../db/connection";
+import { seoAggregationService } from "../services/seoAggregation.service";
 
 export async function seoWorkerChecker(_myTimer: Timer, context: InvocationContext): Promise<void> {
     await connectToDatabase();
 
-    // const [reminders, expired] = await Promise.all([
-    //     subscriptionRenewalService.processRenewalReminders(),
-    //     subscriptionExpiryService.processExpiredSubscriptions(),
-    // ]);
+    await seoAggregationService.computeAll();
 
-    // context.log(`subscriptionChecker: sent ${reminders} renewal reminder(s), expired ${expired} subscription(s)`);
-
+    context.log('seoWorkerChecker: SEO aggregation run complete');
 }
 
-app.timer('subscriptionChecker', {
-    schedule: '0 * * * * *',
+app.timer('seoWorkerChecker', {
+    schedule: '0 * * * * *', // TEMP: every minute for testing — revert to '0 0 2 * * *'
     handler: seoWorkerChecker
 });
